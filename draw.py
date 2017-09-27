@@ -32,7 +32,6 @@ def draw_group(g, real_label, label):
     num_label = len(set_label)
     g_label = nx.complete_graph(num_label)
     pos_label = nx.spring_layout(g_label)
-    print(pos_label)
     pos = dict()
     for i in xrange(num_label):
         move = pos_label[i]
@@ -55,8 +54,9 @@ def draw_group(g, real_label, label):
     node_size = 12800/float(len(g.nodes()))
 
     plt.figure()
-    nx.draw_networkx_nodes(g, pos=pos, node_color=node_color, node_size=node_size, with_labels=False)
+    nx.draw_networkx_nodes(g, pos=pos, node_color=node_color, node_size=node_size)
     nx.draw_networkx_edges(g, pos=pos, style='dotted', alpha=0.2)
+    nx.draw_networkx_labels(g, pos=pos, labels =label)
 
 
 def draw_network(G):
