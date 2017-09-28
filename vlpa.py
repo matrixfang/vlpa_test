@@ -72,16 +72,19 @@ class vlabel(dict):
             norm = float(sum(self.values()))
             for key in self:
                 normalized[key] = float(self[key]) / norm
+            return normalized
         else:
             print "the vlabel is empty"
-
-        return normalized
 
 
 class vlabels(dict):
     # structure of mlabels is like {node1:mlabel1, node2:mlabel2, ...}
     def __init__(self, g):
         self.name = 'vlabels'
+        for node in g.nodes():
+            self[node] = vlabel()
+
+    def initialization(self, g):
         for node in g.nodes():
             label = vlabel()
             for neigh in g.neighbors(node):
@@ -101,4 +104,30 @@ class vlabels(dict):
         labels = dict()
         for node in self:
             labels[node] = self[node].main().keys()[0]
+
+        symbols = list(set(labels.values()))
+
+        for key in labels:
+            labels[key] = symbols.index(labels[key])
         return labels
+
+
+class Propragation(object):
+    def __init__(self, g):
+        self.graph = g
+
+    def run(self):
+        # initiazaiton
+        vectors = vlabels(self.graph)
+        vectors.initialization(self.graph)
+        # propagation step
+        for step in xrange(15):
+            vectors_grad = vlabels(self.graph)
+            for node in self.graph.nodes():
+                for neigh in self.graph.neighbors(node):
+                    vectors_grad[node] = vectors_grad[node] + vectors[neigh]
+                vectors_grad[node] = vectors_grad[node].nlarg(self.graph.degree(node)).normalize()
+            for node in self.graph.nodes():
+                vectors[node] = (vectors[node].scale(0.4) + vectors_grad[node].scale(0.6)).nlarg(self.graph.degree(node)).normalize()
+
+        return vectors.to_labels()
